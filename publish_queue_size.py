@@ -42,12 +42,17 @@ def publish_depths_to_cloudwatch(depths, namespace):
         publish_queue_depth_to_cloudwatch(cloudwatch, queue, depths[queue], namespace)
 
 
-def get_queue_depths_and_publish_to_cloudwatch(host, username, password, vhost, namespace):
+def get_queue_depths_and_publish_to_cloudwatch(host, username, password, vhost, namespace, log_only=False):
     depths = get_queue_depths(host, username, password, vhost)
-    publish_depths_to_cloudwatch(depths, namespace)
+    if log_only:
+        for queue in depths:
+            print("Queue:%s message depth:%d" % (queue, depths[queue]))
+    else:
+        publish_depths_to_cloudwatch(depths, namespace)
 
 if __name__ == "__main__":
     sleep_interval = int(os.environ.get("metric_interval", 300))
+    log_only = bool(os.environ.get("log_only", False))
     print("Publishing metrics every %d seconds" % sleep_interval)
     while True:
         get_queue_depths_and_publish_to_cloudwatch(
@@ -55,5 +60,6 @@ if __name__ == "__main__":
             os.environ.get("rabbitmq_management_user"),
             os.environ.get("rabbitmq_management_password"),
             "/",
-            "rabbitmq_depth")
-        sleep(60 * 5)
+            "rabbitmq_depth", 
+            log_only=log_only)
+        sleep(sleep_interval)
