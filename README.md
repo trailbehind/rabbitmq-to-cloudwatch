@@ -7,7 +7,7 @@ Publish number of messages in a RabbitMQ queue as AWS Cloudwatch metrics. Can al
 All configuration is through environment variables.
 
 - `metric_interval` - Number of seconds to sleep between publishing metrics, default is 300
-- `log_only` - Only log, don't publish to cloudwatch
+- `log_only` - Only log, don't publish to cloudwatch. To enable set this to 1 or `true`
 - `rabbitmq_management_host` - RabbitMQ host, format is `hostname:port`
 - `rabbitmq_management_user` - RabbitMQ username
 - `rabbitmq_management_password` - RabbitMQ password
