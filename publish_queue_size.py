@@ -58,14 +58,26 @@ def get_queue_depths_and_publish_to_cloudwatch(
 if __name__ == "__main__":
     sleep_interval = int(os.environ.get("metric_interval", 300))
     log_only = bool(os.environ.get("log_only", False))
-    print("Publishing metrics every %d seconds" % sleep_interval)
-    while True:
+    rabbitmq_management_host = os.environ.get("rabbitmq_management_host")
+    rabbitmq_management_user = os.environ.get("rabbitmq_management_user")
+    rabbitmq_management_password = os.environ.get("rabbitmq_management_password")
+    rabbitmq_vhost = os.environ.get("rabbitmq_vhost", "/")
+    cloudwatch_namespace = os.environ.get("cloudwatch_namespace", "rabbitmq_depth")
+
+    def run_metrics():
         get_queue_depths_and_publish_to_cloudwatch(
-            os.environ.get("rabbitmq_management_host"),
-            os.environ.get("rabbitmq_management_user"),
-            os.environ.get("rabbitmq_management_password"),
-            os.environ.get("rabbitmq_vhost", "/"),
-            os.environ.get("cloudwatch_namespace", "rabbitmq_depth"),
+            rabbitmq_management_host,
+            rabbitmq_management_user,
+            rabbitmq_management_password,
+            rabbitmq_vhost,
+            cloudwatch_namespace,
             log_only=log_only,
         )
-        sleep(sleep_interval)
+
+    if sleep_interval < 0:
+        run_metrics()
+    else:
+        print("Publishing metrics every %d seconds" % sleep_interval)
+        while True:
+            run_metrics()
+            sleep(sleep_interval)
